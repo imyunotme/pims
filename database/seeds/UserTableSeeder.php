@@ -18,61 +18,31 @@ class UserTableSeeder extends Seeder {
 				'username' => 'admin',
 				'password' => Hash::make('12345678'),
 				'access' =>'0',
-				'firstname' => 'Elliot',
+				'firstname' => 'John Joseph',
 				'middlename' => '',
-				'lastname' => 'Alderson',
+				'lastname' => 'Lim',
 				'email' => 'elliotalderson@yahoo.com',
 				'status' =>'1',
-				'office' => 'ICTO',
+				'department' => 'Executive', 
 				'position' => 'head',
 				'created_at' => date('Y-m-d H:i:s'),
 				'updated_at' => date('Y-m-d H:i:s')
 			),
 
 			array(
-				'username' => 'amo',
+				'username' => 'cashier',
 				'password' => Hash::make('12345678'),
 				'access' =>'1',
-				'firstname' => 'Tyrion',
+				'firstname' => 'Erick John',
 				'middlename' => '',
-				'lastname' => 'Lannister',
+				'lastname' => 'Yu',
 				'email' => 'tyrionlannister@yahoo.com',
 				'status' =>'1',
-				'office' => 'AMO',
+				'department' => 'Treasury',
 				'position' => 'head',
 				'created_at' => date('Y-m-d H:i:s'),
 				'updated_at' => date('Y-m-d H:i:s')
 			),
-
-			array(
-				'username' => 'accounting',
-				'password' => Hash::make('12345678'),
-				'access' =>'2',
-				'firstname' => 'Skyler',
-				'middlename' => '',
-				'lastname' => 'White',
-				'email' => 'skylerwhite@yahoo.com',
-				'status' =>'1',
-				'office' => 'ACC',
-				'position' => 'head',
-				'created_at' => date('Y-m-d H:i:s'),
-				'updated_at' => date('Y-m-d H:i:s')
-			),
-
-			array(
-				'username' => 'ccis',
-				'password' => Hash::make('12345678'),
-				'access' =>'3',
-				'firstname' => 'Carlo',
-				'middlename' => '',
-				'lastname' => 'Inovero',
-				'email' => 'pup.ccis.server@gmail.com',
-				'status' =>'3',
-				'office' => 'CCIS',
-				'position' => 'head',
-				'created_at' => date('Y-m-d H:i:s'),
-				'updated_at' => date('Y-m-d H:i:s')
-			)
 		]);
 	}
 

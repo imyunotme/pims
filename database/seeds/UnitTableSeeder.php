@@ -44,7 +44,31 @@ class UnitTableSeeder extends Seeder
                 'description' => 'base unit of length in the International System of Units',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
-            )
+            ),
+
+            array(
+                'name' => 'Sacks',
+                'abbreviation' => 'SCK',
+                'description' => 'Sack of something',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ),
+
+            array(
+                'name' => 'Kilogram',
+                'abbreviation' => 'kl',
+                'description' => '1000 grams',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ),
+
+            array(
+                'name' => 'Gallon',
+                'abbreviation' => 'GAL',
+                'description' => '1 drum',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ),
         ]);
     }
 }

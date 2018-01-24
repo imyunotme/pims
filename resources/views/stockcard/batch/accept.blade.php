@@ -2,10 +2,10 @@
 
 @section('header')
 	<section class="content-header">
-		<legend><h3 class="text-muted">Batch Accept</h3></legend>
+		<legend><h3 class="text-muted">Accept</h3></legend>
 		<ul class="breadcrumb">
 			<li><a href="{{ url('inventory/supply') }}">Supply Inventory</a></li>
-			<li class="active">Batch Accept</li>
+			<li class="active">Accept</li>
 		</ul>
 	</section>
 @endsection
@@ -15,119 +15,18 @@
 <!-- Default box -->
   <div class="box" style="padding:10px;">
     <div class="box-body">
-		{{ Form::open(['method'=>'post','route'=>array('supply.stockcard.batch.accept'),'class'=>'form-horizontal','id'=>'acceptForm']) }}
-		@if (count($errors) > 0)
-		  <div class="alert alert-danger alert-dismissible" role="alert">
-		       <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-		        <ul style='margin-left: 10px;'>
-		            @foreach ($errors->all() as $error)
-		                <li>{{ $error }}</li>
-		            @endforeach
-		        </ul>
-		    </div>
-		@endif
-		<div class="col-sm-4">
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Supplier') }}
-					{{ Form::select('supplier',$supplier,Input::old('supplier'),[
-						'id' => 'supplier',
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
-			<div class="col-md-12" style="margin-top:10px;">
-				<div class="form-group">
-					{{ Form::label('purchaseorder','Purchase Order',[
-							'id' => 'purchaseorder-label'
-					]) }}
-					{{ Form::text('purchaseorder',Input::old('purchaseorder'),[
-						'id' => 'purchaseorder',
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Delivery Receipt') }}
-					{{ Form::text('dr',Input::old('dr'),[
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Date') }}
-					{{ Form::text('date',Input::old('date'),[
-						'id' => 'date',
-						'class' => 'form-control',
-						'readonly',
-						'style' => 'background-color: white;'
-					]) }}
-				</div>
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Fund Clusters') }}
-					{{ Form::text('fundcluster',Input::old('fundcluster'),[
-						'class' => 'form-control'
-					]) }}
-					<p class="text-muted">Separate each cluster by comma</p>
-				</div>
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Days to Consume') }}
-					{{ Form::text('daystoconsume',Input::old('daystoconsume'),[
-						'id' => 'daystoconsume',
-						'class' => 'form-control',
-					]) }}
-				</div>
-			</div>
-			<div class="form-group">
-				<div class="col-md-12">
-				{{ Form::label('stocknumber','Stock Number') }}
-				</div>
-				<div class="col-md-9">
-				{{ Form::text('stocknumber',null,[
-					'id' => 'stocknumber',
-					'class' => 'form-control'
-				]) }}
-				</div>
-				<div class="col-md-1">
-					<button type="button" id="add-stocknumber" class="btn btn-sm btn-primary">Select</button>
-				</div>
-			</div>
-			<input type="hidden" id="supply-item" />
-			<div id="stocknumber-details">
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
-				{{ Form::label('Quantity') }}
-				{{ Form::text('quantity','',[
-					'id' => 'quantity',
-					'class' => 'form-control'
-				]) }}
-				</div>
-			</div>
-			<div class="btn-group" style="margin-bottom: 20px;">
-				<button type="button" id="add" class="btn btn-md btn-success"><span class="glyphicon glyphicon-plus"></span> Add</button>
-			</div>
+		{{ Form::open(['method'=>'post','route'=>array('supply.store'),'class'=>'form-horizontal','id'=>'acceptForm']) }}
+		@include('errors.alert')
+		<div class="col-md-12">
+		<div class="form-group">
+			{{ Form::label('Supplier') }}
+			{{ Form::select('supplier',$supplier,Input::old('supplier'),[
+				'id' => 'supplier',
+				'class' => 'form-control'
+			]) }}
 		</div>
-		<div class="col-sm-8">
-			<legend class="text-muted"><h3>Supplies List</h3></legend>
-			<table class="table table-hover table-condensed table-bordered" id="supplyTable">
-				<thead>
-					<tr>
-						<th>Stock Number</th>
-						<th>Information</th>
-						<th>Quantity</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
+		</div>
+		@include('stockcard.batch.form')
 			<div class="pull-right">
 				<div class="btn-group">
 					<button type="button" id="accept" class="btn btn-md btn-primary btn-block">Accept</button>
@@ -147,15 +46,12 @@
 <script>
 $('document').ready(function(){
 
-	$('#purchaseorder').autocomplete({
-		source: "{{ url('get/purchaseorder/all') }}"
-	})
-
 	$('#stocknumber').autocomplete({
-		source: "{{ url("get/inventory/supply/stocknumber") }}"
+		source: "{{ url("inventory/supply") }}"
 	})
 
 	$('#accept').on('click',function(){
+
 		if($('#supplyTable > tbody > tr').length == 0)
 		{
 			swal('Blank Field Notice!','Supply table must have atleast 1 item','error')
@@ -181,23 +77,21 @@ $('document').ready(function(){
 
 	})
 
-	$('#cancel').on('click',function(){
-		window.location.href = "{{ url('inventory/supply') }}"
-	})
-
 	function setStockNumberDetails(){
 		$.ajax({
 			type: 'get',
-			url: '{{ url('inventory/supply') }}' +  '/' + $('#stocknumber').val(),
+			url: '{{ url('inventory/supply') }}' +  '?stocknumber=' + $('#stocknumber').val(),
 			dataType: 'json',
 			success: function(response){
 				try{
 					details = response.data.details
+					unitcost = response.data.unitcost
 					$('#supply-item').val(details.toString())
 					$('#stocknumber-details').html(`
 						<div class="alert alert-info">
 							<ul class="list-unstyled">
 								<li><strong>Item:</strong> ` + details + ` </li>
+								<li><strong>Cost:</strong> ` + unitcost + ` </li>
 								<li><strong>Remaining Balance:</strong> `
 								+ response.data.balance +
 								`</li>
@@ -210,7 +104,7 @@ $('document').ready(function(){
 					$('#stocknumber-details').html(`
 						<div class="alert alert-danger">
 							<ul class="list-unstyled">
-								<li>Invalid Property Number</li>
+								<li>Invalid Item</li>
 							</ul>
 						</div>
 					`)
@@ -246,17 +140,20 @@ $('document').ready(function(){
 		stocknumber = $('#stocknumber').val()
 		quantity = $('#quantity').val()
 		details = $('#supply-item').val()
-		if(addForm(row,stocknumber,details,quantity))
+		unitcost = $('#unitcost').val()
+		if(addForm(row,stocknumber,details,quantity,unitcost))
 		{
 			$('#stocknumber').text("")
 			$('#quantity').text("")
+			$('#unitcost').text("")
 			$('#stocknumber-details').html("")
 			$('#stocknumber').val("")
 			$('#quantity').val("")
+			$('#unitcost').val("")
 		}
 	})
 
-	function addForm(row,_stocknumber = "",_info ="" ,_quantity = "")
+	function addForm(row,_stocknumber = "",_info ="" ,_quantity = "", _unitcost = 0)
 	{
 		error = false
 		$('.stocknumber-list').each(function() {
@@ -278,6 +175,7 @@ $('document').ready(function(){
 				<td><input type="text" class="stocknumber-list form-control text-center" value="` + _stocknumber + `" name="stocknumber[` + _stocknumber + `]" style="border:none;" /></td>
 				<td><input type="hidden" class="form-control text-center" value="` + _info + `" name="info[` + _stocknumber + `]" style="border:none;" />` + _info + `</td>
 				<td><input type="number" class="form-control text-center" value="` + _quantity + `" name="quantity[` + _stocknumber + `]" style="border:none;"  /></td>
+				<td><input type="text" class="form-control text-center" value="` + _unitcost + `" name="unitcost[` + _stocknumber + `]" style="border:none;"  /></td>
 				<td><button type="button" class="remove btn btn-md btn-danger text-center"><span class="glyphicon glyphicon-remove"></span></button></td>
 			</tr>
 		`)
@@ -315,7 +213,7 @@ $('document').ready(function(){
 		  row = 1
 		} else row++
 
-		addForm(row,"{{ $stocknumber }}","{{ old("info.$stocknumber") }}", "{{ old("quantity.$stocknumber") }}")
+	    addForm(row,"{{ $stocknumber }}","{{ old("info.$stocknumber") }}", "{{ old("quantity.$stocknumber") }}", "{{ old("unitcost.$stocknumber") }}")
 		@endforeach
 
 	}
@@ -323,23 +221,9 @@ $('document').ready(function(){
 	init();
 
 	@endif
-	setReferenceLabel( $("#supplier option:selected").text() )
-
 	$('#supplier').on('change',function(){
 		setReferenceLabel($("#supplier option:selected").text())
 	})
-
-    function setReferenceLabel(supplier)
-    {
-      	if( supplier == "{{ config('app.main_agency') }}")
-      	{
-      		$('#purchaseorder-label').text('Agency Purchase Request')
-      	}
-      	else
-      	{
-      		$('#purchaseorder-label').text('Purchase Order')
-      	}
-    }
 
     $('#stocknumber').on('change',function(){
       setStockNumberDetails()

@@ -16,6 +16,11 @@ return [
 
     'main_agency' => env('MAIN_AGENCY','Not Set'),
 
+    'company' => [
+        'name' => env('COMPANY_NAME','Company Name'),
+        'address' => env('COMPANY_ADDRESS','Company Address'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

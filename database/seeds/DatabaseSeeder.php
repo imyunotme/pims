@@ -16,14 +16,10 @@ class DatabaseSeeder extends Seeder {
 		DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 		
 		$this->call('SupplyTableSeeder');
-		$this->call('SupplierTableSeeder');
-		$this->call('OfficeTableSeeder');
-		// $this->call('PurchaseOrderTableSeeder');
-		// $this->call('POSupplyTableSeeder');
+		$this->call('ReferenceTableSeeder');
 		$this->call('UserTableSeeder');
+		$this->call('CategoriesTableSeeder');
 		$this->call('UnitTableSeeder');
-		$this->call('LanguageTableSeeder');
-		$this->call('SettingsTableSeeder');
 		DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
 	}

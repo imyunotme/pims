@@ -2,10 +2,10 @@
 
 @section('header')
 	<section class="content-header">
-		<legend><h3 class="text-muted">Batch Release</h3></legend>
+		<legend><h3 class="text-muted">Release</h3></legend>
 		<ul class="breadcrumb">
 			<li><a href="{{ url('inventory/supply') }}">Supply Inventory</a></li>
-			<li class="active">Batch Release</li>
+			<li class="active">Release</li>
 		</ul>
 	</section>
 @endsection
@@ -15,7 +15,7 @@
 <!-- Default box -->
   <div class="box" style="padding:10px;">
     <div class="box-body">
-		{{ Form::open(['method'=>'post','route'=>array('supply.stockcard.batch.release'),'class'=>'form-horizontal','id'=>'releaseForm']) }}
+		{{ Form::open(['method'=>'post','url'=>array('inventory/supply/release'),'class'=>'form-horizontal','id'=>'releaseForm']) }}
         @if (count($errors) > 0)
             <div class="alert alert-danger alert-dismissible" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -27,19 +27,9 @@
             </div>
         @endif
         <div class="col-sm-4">
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Office') }}
-					{{ Form::text('office',Input::old('office'),[
-						'id' => 'office',
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
-			<div id="office-details"></div>
 			<div class="form-group">
 				<div class="col-md-12">
-					{{ Form::label('Requisition Issuance Slip') }}
+					{{ Form::label('Invoice') }}
 				</div>
 				<div class="col-md-8">
 					{{ Form::text('reference',Input::old('reference'),[
@@ -53,6 +43,16 @@
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
+					{{ Form::label('Buyer') }}
+					{{ Form::text('office',Input::old('buyer'),[
+						'id' => 'buyer',
+						'class' => 'form-control'
+					]) }}
+				</div>
+			</div>
+			<div id="office-details"></div>
+			<div class="col-md-12">
+				<div class="form-group">
 					{{ Form::label('Date') }}
 					{{ Form::text('date',Input::old('date'),[
 						'id' => 'date',
@@ -64,11 +64,11 @@
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Days to Consume') }}
-					{{ Form::text('daystoconsume',Input::old('daystoconsume'),[
-						'id' => 'daystoconsume',
-						'class' => 'form-control',
-					]) }}
+					{{ Form::label('Status') }}
+					<select name="status" id="status" class="form-control">
+						<option value="paid">Paid</option>
+						<option value="unpaid">Unpaid</option>
+					</select>
 				</div>
 			</div>
 			<div class="form-group">
@@ -96,6 +96,15 @@
 				]) }}
 				</div>
 			</div>
+			<div class="col-md-12">
+				<div class="form-group">
+				{{ Form::label('Unit Cost') }}
+				{{ Form::text('unitcost','',[
+					'id' => 'unitcost',
+					'class' => 'form-control'
+				]) }}
+				</div>
+			</div>
 			<div class="btn-group" style="margin-bottom: 20px">
 				<button type="button" id="add" class="btn btn-md btn-success"><span class="glyphicon glyphicon-plus"></span> Add</button>
 			</div>
@@ -108,6 +117,7 @@
 						<th>Stock Number</th>
 						<th>Information</th>
 						<th>Quantity</th>
+						<th>Unit Cost</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -201,16 +211,18 @@ $('document').ready(function(){
 	function setStockNumberDetails(){
 		$.ajax({
 			type: 'get',
-			url: '{{ url('inventory/supply') }}' +  '/' + $('#stocknumber').val() ,
+			url: '{{ url('inventory/supply') }}' +  '?stocknumber=' + $('#stocknumber').val() ,
 			dataType: 'json',
 			success: function(response){
 				try{
 					details = response.data.details
+					unitcost = response.data.unitcost
 					$('#supply-item').val(details.toString())
 					$('#stocknumber-details').html(`
 						<div class="alert alert-info">
 							<ul class="list-unstyled">
 								<li><strong>Item:</strong> ` + details + ` </li>
+								<li><strong>Cost:</strong> ` + unitcost + ` </li>
 								<li><strong>Remaining Balance:</strong> `
 								+ response.data.balance +
 								`</li>
@@ -223,7 +235,7 @@ $('document').ready(function(){
 					$('#stocknumber-details').html(`
 						<div class="alert alert-danger">
 							<ul class="list-unstyled">
-								<li>Invalid Property Number</li>
+								<li>Invalid Item</li>
 							</ul>
 						</div>
 					`)
@@ -237,7 +249,7 @@ $('document').ready(function(){
 	$('#generateRIS').on('click',function(){
 		$.ajax({
 			type: 'get',
-			url: '{{ url('request/generate') }}'  ,
+			url: '{{ url('inventory/supply/generate') }}'  ,
 			dataType: 'json',
 			success: function(response){
 				$('#reference').val(response)
@@ -270,17 +282,20 @@ $('document').ready(function(){
 		stocknumber = $('#stocknumber').val()
 		quantity = $('#quantity').val()
 		details = $('#supply-item').val()
-		if(addForm(row,stocknumber,details,quantity))
+		unitcost = $('#unitcost').val()
+		if(addForm(row,stocknumber,details,quantity,unitcost))
 		{
 			$('#stocknumber').text("")
 			$('#quantity').text("")
+			$('#unitcost').text("")
 			$('#stocknumber-details').html("")
 			$('#stocknumber').val("")
 			$('#quantity').val("")
+			$('#unitcost').val("")
 		}
 	})
 
-	function addForm(row,_stocknumber = "",_info ="" ,_quantity = "")
+	function addForm(row,_stocknumber = "",_info ="" ,_quantity = "", _unitcost)
 	{
 		error = false
 		$('.stocknumber-list').each(function() {
@@ -302,6 +317,7 @@ $('document').ready(function(){
 				<td><input type="text" class="stocknumber-list form-control text-center" value="` + _stocknumber + `" name="stocknumber[` + _stocknumber + `]" style="border:none;" /></td>
 				<td><input type="hidden" class="form-control text-center" value="` + _info + `" name="info[` + _stocknumber + `]" style="border:none;" />` + _info + `</td>
 				<td><input type="number" class="form-control text-center" value="` + _quantity + `" name="quantity[` + _stocknumber + `]" style="border:none;"  /></td>
+				<td><input type="text" class="form-control text-center" value="` + _unitcost + `" name="unitcost[` + _stocknumber + `]" style="border:none;"  /></td>
 				<td><button type="button" class="remove btn btn-md btn-danger text-center"><span class="glyphicon glyphicon-remove"></span></button></td>
 			</tr>
 		`)
@@ -339,7 +355,7 @@ $('document').ready(function(){
 	      row = 1
 	    } else row++
 
-	    addForm(row,"{{ $stocknumber }}","{{ old("info.$stocknumber") }}", "{{ old("quantity.$stocknumber") }}")
+	    addForm(row,"{{ $stocknumber }}","{{ old("info.$stocknumber") }}", "{{ old("quantity.$stocknumber") }}", "{{ old("unitcost.$stocknumber") }}")
 	  @endforeach
 
 	  }

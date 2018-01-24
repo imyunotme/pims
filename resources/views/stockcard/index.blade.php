@@ -18,7 +18,7 @@
 		<legend><h3 class="text-muted">Stock Card</h3></legend>
 		<ul class="breadcrumb">
 			<li><a href="{{ url('inventory/supply') }}">Inventory</a></li>
-			<li class="active">{{ $supply->stocknumber }}</li>
+			<li class="active">{{ isset($product->supply) ? isset($product->supply->name) ? $product->supply->name : 'None' : 'None' }}</li>
 			<li class="active">Stock Card</li>
 		</ul>
 	</section>
@@ -31,27 +31,29 @@
 			<table class="table table-hover table-striped table-bordered table-condensed" id="inventoryTable" cellspacing="0" width="100%">
 				<thead>
 		            <tr rowspan="2">
-		                <th class="text-left" colspan="4">Entity Name:  <span style="font-weight:normal">{{ $supply->entityname }}</span> </th>
-		                <th class="text-left" colspan="4">Fund Cluster:  
-		                	<span style="font-weight:normal"> {{ implode(", ",  $supply->fundcluster->toArray()) }} </span>
-		                </th>
+		                <th class="text-left" colspan="4">Name:  <span style="font-weight:normal">{{ isset($product->supply) ? isset($product->supply->name) ? $product->supply->name : 'None' : 'None' }}</span> </th>
+		                <th class="text-left" colspan="4">Details:  <span style="font-weight:normal">{{ isset($product->supply) ? isset($product->supply->details) ? $product->supply->details : 'None' : 'None' }}</span> </th>
 		            </tr>
 		            <tr rowspan="2">
-		                <th class="text-left" colspan="4">Item:  <span style="font-weight:normal">{{ $supply->details }}</span> </th>
-		                <th class="text-left" colspan="4">Stock No.:  <span style="font-weight:normal">{{ $supply->stocknumber }}</span> </th>
+		                <th class="text-left" colspan="4">Unit Of Measurement:  <span style="font-weight:normal">{{ isset($product->unit) ? isset($product->unit->name) ? $product->unit->name : 'None' : 'None' }}</span>  </th>
+		                <th class="text-left" colspan="4">Reorder Point: <span style="font-weight:normal">{{ $product->reorderpoint }}</span> </th>
 		            </tr>
 		            <tr rowspan="2">
-		                <th class="text-left" colspan="4">Unit Of Measurement:  <span style="font-weight:normal">{{ $supply->unit }}</span>  </th>
-		                <th class="text-left" colspan="4">Reorder Point: <span style="font-weight:normal">{{ $supply->reorderpoint }}</span> </th>
+		                <th class="text-center" colspan="4">Information</th>
+		                <th class="text-center" colspan="1">In</th>
+		                <th class="text-center" colspan="1">Out</th>
+		                <th class="text-center" colspan="2"></th>
 		            </tr>
 					<tr>
 						<th>Date</th>
-						<th>Reference</th>
-						<th>Receipt Qty</th>
-						<th>Issue Qty</th>
-						<th>Office</th>
-						<th>Balance Qty</th>
-						<th>Days To Consume</th>
+						<th>Product</th>
+						<th>Receipt</th>
+						<th>Name/Supplier</th>
+						<th>Quantity</th>
+						<th>Quantity</th>
+						<th>Balance</th>
+						<th>Remarks</th>
+						
 					</tr>
 				</thead>
 			</table>
@@ -66,6 +68,7 @@
 	$(document).ready(function() {
 
 	    var table = $('#inventoryTable').DataTable({
+	    	serverSide: true,
 			language: {
 					searchPlaceholder: "Search..."
 			},
@@ -76,62 +79,31 @@
 				{ "type": "date", "targets": 0 },
 			],
 			"processing": true,
-			ajax: '{{ url("inventory/supply/$supply->stocknumber/stockcard/") }}',
+			ajax: '{{ url("stockcard/$product->id?") }}',
 			columns: [
-					{ data: function(callback){
-						return moment(callback.date).format("MMM D, YYYY")
-					} },
-					{ data: "reference" },
-					{ data: function(callback){
-						if(callback.received == null)
-							return 0
-						else
-							return callback.received
-					}},
-					{ data: function(callback){
-						if(callback.issued == null)
-							return 0
-						else
-							return callback.issued
-					}},
-					{ data: function(callback){
-						if(callback.organization == null || callback.organization == "")
-							return "N/A"
-						else
-							return callback.organization
-					}},
-					{ data: "balance" },
-					{ data: function(callback){
-						if(callback.daystoconsume == null || callback.daystoconsume == "")
-							return "N/A"
-						else
-							return callback.daystoconsume
-					}},
+				{ data: "parsed_date" },
+				{ data: "product_details" },
+				{ data: function(callback){
+					if(callback.receipt) return callback.receipt
+						return null
+				}},					
+				{ data: function(callback){
+					if(callback.organization) return callback.organization
+						return null
+				}},
+				{ data: "issued"},
+				{ data: "received"},
+				{ data: "balance" },
+				{ data: "remarks"},
 			],
 	    });
 
 	 	$("div.toolbar").html(`
-	       <a href="{{ url("inventory/supply/$supply->stocknumber/stockcard/print") }}" target="_blank" id="print" class="print btn btn-sm btn-default ladda-button" data-style="zoom-in">
+	       <a href="{{ url("stockcard/$product->id/print") }}" target="_blank" id="print" class="print btn btn-sm btn-default ladda-button" data-style="zoom-in">
 	        <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
 	        <span id="nav-text"> Print</span>
 	      </a>
-			<button type="button" id="accept" class="btn btn-sm btn-success">
-				<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-				<span id="nav-text"> Accept</span>
-			</button>
-			<button type="button" id="release" class="btn btn-sm btn-danger">
-				<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>
-				<span id="nav-text"> Release</span>
-			</button>
 		`);
-
-		$('#accept').on('click',function(){
-			window.location.href = "{{ url("inventory/supply/$supply->stocknumber/stockcard/create") }}"
-		});
-
-		$('#release').on('click',function(){
-			window.location.href = "{{ url("inventory/supply/$supply->stocknumber/stockcard/release") }}"
-		});
 	} );
 </script>
 @endsection

@@ -15,23 +15,20 @@ class CreateStockCardsTable extends Migration
     {
         Schema::create('stockcards', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('user_id');
             $table->date('date');                   
-            $table->string('stocknumber');
-            $table->foreign('stocknumber')
-                    ->references('stocknumber')
-                    ->on('supplies')
+            $table->integer('product_id')->unsigned();
+            $table->foreign('product_id')
+                    ->references('id')
+                    ->on('products')
                     ->onUpdate('cascade')
                     ->onDelete('cascade');
-            $table->string('supplier',100)->nullable();
-            $table->decimal('balance',8,0)->default(0); 
-            $table->string('reference',100)->nullable();
-            $table->string('receipt')->nullable();             
-            $table->integer('receivedquantity')->default(0);
-            $table->decimal('receivedunitprice')->default(0);
-            $table->integer('issuedquantity')->default(0);
-            $table->decimal('issuedunitprice')->default(0);
-            $table->decimal('balancequantity',8,0)->default(0); 
+            $table->string('receipt', 100)->nullable();
+            $table->string('reference', 100)->nullable();
+            $table->decimal('received')->default(0);
+            $table->decimal('issued')->default(0);
+            $table->decimal('balance', 8, 0)->default(0);
+            $table->string('remarks')->nullable();
+            $table->string('status');
             $table->string('created_by');
             $table->timestamps();
         });

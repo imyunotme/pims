@@ -35,7 +35,7 @@
                             </div>
                             <div class="col-lg-8" style="font-size: 12px;white-space:nowrap;margin:0px;padding:0px;">
                                 <div class="row">
-                                    <h5><strong>Polytechnic University Of the Philippines</strong></h5>
+                                    <h5><strong>{{ config('app.company.name') }}</strong></h5>
                                 </div>
                                 <div class="row">
                                 {{ config('app.name', 'Supplies Inventory Management System') }}

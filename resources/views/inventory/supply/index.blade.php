@@ -15,16 +15,19 @@
   <div class="box">
     <div class="box-body">
 		<div class="panel panel-body table-responsive">
-		<table class="table table-hover table-condensed" id="supplyInventoryTable" width=100%>
+		<table class="table table-hover table-bordered" id="supplyInventoryTable" width=100%>
 			<thead>
-				<th class="col-sm-1">Stock No.</th>
-				<th class="col-sm-1">Supply Item</th>
-				<th class="col-sm-1">Unit</th>
-				<th class="col-sm-1">Reorder Point</th>
-				<th class="col-sm-1">Remaining Balance</th>
-				@if(Auth::user()->access == 1 || Auth::user()->access == 2)
-				<th class="col-sm-1 no-sort"></th>
-				@endif
+				<tr>
+					<th class="col-sm-1">Category</th>
+					<th class="col-sm-1">Name</th>
+					<th class="col-sm-1">Details</th>
+					<th class="col-sm-1">Unit</th>
+					<th class="col-sm-1">Cost</th>
+					<th class="col-sm-1">Balance</th>
+					@if(Auth::user()->access == 1 || Auth::user()->access == 2)
+					<th class="col-sm-1 no-sort"></th>
+					@endif
+				</tr>
 			</thead>
 		</table>
 		</div>
@@ -39,7 +42,7 @@
 	$(document).ready(function() {
 
 	    var table = $('#supplyInventoryTable').DataTable({
-
+	    	serverSide: true,
 			language: {
 					searchPlaceholder: "Search..."
 			},
@@ -54,90 +57,35 @@
 			"processing": true,
 			ajax: "{{ url('inventory/supply') }}",
 			columns: [
-					{ data: "stocknumber" },
-					{ data: "details" },
-					{ data: "unit" },
-					{ data: "reorderpoint" },
-					@if(Auth::user()->access == 2)
-					{ data: "ledger_balance" },
-					@else
-					{ data: "balance" },
-					@endif
-					@if(Auth::user()->access == 1 || Auth::user()->access == 2)
-		            { data: function(callback){
-		            	return `
-		            			@if(Auth::user()->access == 1)
-		            			<a href="{{ url("inventory/supply") }}` + '/' + callback.stocknumber  + '/stockcard' +`" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-list"></span> Stockcard</a>
-                      <a href="{{ url("inventory/supply") }}` + '/' + callback.stocknumber  + '/stockcard/print' +`" target="_blank" id="print" class="print btn btn-sm btn-default ladda-button" data-style="zoom-in">
-              	        <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
-              	        <span id="nav-text"> Print</span>
-              	      </a>
-		            			@endif
-		            			@if(Auth::user()->access == 2)
-		            			<a href="{{ url("inventory/supply") }}` + '/' + callback.stocknumber  + '/ledgercard' +`" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-list"></span> Supply Ledger</a>
-                      <a href="{{ url("inventory/supply") }}` + '/' + callback.stocknumber  + '/ledgercard/print' +`" target="_blank" id="print" class="print btn btn-sm btn-default ladda-button" data-style="zoom-in">
-              	        <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
-              	        <span id="nav-text"> Print</span>
-              	      </a>
-		            			@endif
-		            	`;
-		            } }
-		            @endif
+	            { data: "code" },
+	            { data: "category.name" },
+	            { data: function(callback){
+	            	if(callback.supply) return callback.supply.name
+	            		else return null
+	            } },
+	            { data: function(callback){
+	            	if(callback.unit) return callback.unit.name
+	            		else return null
+	            } },
+	            { data: "cost" },
+	            { data: "balance" },
+	            { data: function(callback){
+	            	return `
+	            			<a href="{{ url("stockcard") }}` + '/' + callback.id  + `" class="btn btn-sm btn-default">Stock Card</a>
+	            			<a target="_blank" href="{{ url("stockcard") }}` + '/' + callback.id  + `/print" class="btn btn-sm btn-primary">Print</a>
+	            	`;
+	            } }
 			],
 	    });
 
-    @if(Auth::user()->access == 2)
-	 	$("div.toolbar").html(`
-        <a href="{{ url("inventory/supply/ledgercard/print") }}" target="_blank" id="print" class="print btn btn-sm btn-default ladda-button" data-style="zoom-in">
-	        <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
-	        <span id="nav-text"> Print</span>
-	      </a>
-				<button id="accept" class="btn btn-sm btn-success">
-					<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-					<span id="nav-text"> Batch Accept</span>
-				</button>
-				<button id="release" class="btn btn-sm btn-danger">
-					<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>
-					<span id="nav-text"> Batch Release</span>
-				</button>
-		`);
-		@endif
-
 		@if(Auth::user()->access == 1)
 	 	$("div.toolbar").html(`
-      <a href="{{ url("inventory/supply/stockcard/print") }}" target="_blank" id="print" class="print btn btn-sm btn-default ladda-button" data-style="zoom-in">
-        <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
-        <span id="nav-text"> Print</span>
-      </a>
-			<button id="accept" class="btn btn-sm btn-success">
-				<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-				<span id="nav-text"> Batch Accept</span>
-			</button>
-			<button id="release" class="btn btn-sm btn-danger">
-				<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-				<span id="nav-text"> Batch Release</span>
-			</button>
+		      <a href="{{ url("inventory/supply/stockcard/print") }}" target="_blank" id="print" class="print btn btn-sm btn-default ladda-button" data-style="zoom-in">
+		        <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
+		        <span id="nav-text"> Print</span>
+		      </a>
 		`);
 		@endif
-
-		$('#accept').on("click",function(){
-			@if(Auth::user()->access == 1)
-			window.location.href = "{{ url('inventory/supply/stockcard/batch/form/accept') }}"
-			@elseif(Auth::user()->access == 2)
-			window.location.href = "{{ url('inventory/supply/ledgercard/batch/form/accept') }}"
-			@endif
-		});
-
-		$('#release').on('click',function(){
-			@if(Auth::user()->access == 1)
-			window.location.href = "{{ url('inventory/supply/stockcard/batch/form/release') }}"
-			@elseif(Auth::user()->access == 2)
-			window.location.href = "{{ url('inventory/supply/ledgercard/batch/form/release') }}"
-			@endif
-
-		});
-
-		$('#page-body').show();
 	} );
 </script>
 @endsection

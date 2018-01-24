@@ -15,10 +15,8 @@ class CreateSuppliesTable extends Migration {
 		Schema::create('supplies', function(Blueprint $table)
 		{
 			$table->increments('id');
-			$table->string('stocknumber')->unique();
+			$table->string('name')->unique();
             $table->string('details');		
-            $table->string('unit');
-            $table->integer('reorderpoint')->nullable();
 			$table->timestamps();
 		});
 	}
@@ -30,7 +28,7 @@ class CreateSuppliesTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('supplies');
+		Schema::dropIfExists('supplies');
 	}
 
 }

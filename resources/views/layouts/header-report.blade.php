@@ -24,8 +24,8 @@
             </div>
             <div style="margin-left: 5px;">
           		<div style="font-size:10pt;">Republic of the Philippines	</div>
-          		<div style="font-size:12pt;">POLYTECHNIC UNIVERSITY OF THE PHILIPPINES </div>
-          		<div style="font-size:10pt;">Sta. Mesa, Manila  </div>
+          		<div style="font-size:12pt;">{{ config('app.company.name') }}</div>
+          		<div style="font-size:10pt;">{{ config('app.company.address') }}</div>
             </div>
         </div>
         <div class="col-sm-12">

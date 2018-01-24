@@ -2,46 +2,47 @@
 @section('title',"Stock Card $supply->stocknumber")
 @section('content')
   <div id="content" class="col-sm-12">
-  	<table class="table table-striped table-bordered" id="inventoryTable" width="100%" cellspacing="0">
-  		<thead>
+    <table class="table table-hover table-striped table-bordered table-condensed" id="inventoryTable" cellspacing="0" width="100%">
+      <thead>
+          <tr rowspan="2">
+              <th class="text-left" colspan="5">Stock:  <span style="font-weight:normal">{{ $supply->stocknumber }}</span> </th>
+              <th class="text-left" colspan="5">Details:  <span style="font-weight:normal">{{ $supply->details }}</span> </th>
+          </tr>
+          <tr rowspan="2">
+              <th class="text-left" colspan="5">Unit Of Measurement:  <span style="font-weight:normal">{{ $supply->unit }}</span>  </th>
+              <th class="text-left" colspan="5">Reorder Point: <span style="font-weight:normal">{{ $supply->reorderpoint }}</span> </th>
+          </tr>
+          <tr rowspan="2">
+              <th class="text-center" colspan="4">Information</th>
+              <th class="text-center" colspan="4">Quantity</th>
+              <th class="text-center" colspan="2"></th>
+          </tr>
         <tr>
-            <th class="text-left" colspan="4">Entity Name:  <span style="font-weight:normal">{{ $supply->entityname }}</span> </th>
-            <th class="text-left" colspan="3">Fund Cluster:
-              <span style="font-weight:normal"> @foreach($supply->purchaseorder as $supplypurchaseorder) {{ $supplypurchaseorder->fundcluster }}@if($supply->purchaseorder->first() != $supplypurchaseorder && $supply->purchaseorder->last() != $supplypurchaseorder),  @endif
-            @endforeach
-              </span>
-            </th>
+          <th>Date</th>
+          <th>Receipt</th>
+          <th>Name/Supplier</th>
+          <th>In</th>
+          <th>Out</th>
+          <th>Unit Cost</th>
+          <th>Amount</th>
+          <th>Balance</th>
+          <th>Remarks</th>
+          
         </tr>
-        <tr>
-            <th class="text-left" colspan="4">Item:
-              <span style="font-weight:normal; @if(strlen($supply->details) > 0)@if(strlen($supply->details) > 60) font-size: 10px; @elseif(strlen($supply->details) > 40) font-size: 11px; @elseif(strlen($supply->details) > 20) font-size: 12px; @endif @endif">{{ $supply->details }}</span> </th>
-            <th class="text-left" colspan="3">Stock No.:  <span style="font-weight:normal">{{ $supply->stocknumber }}</span> </th>
-        </tr>
-        <tr>
-            <th class="text-left" colspan="4">Unit Of Measurement:  <span style="font-weight:normal">{{ $supply->unit }}</span>  </th>
-            <th class="text-left" colspan="3">Reorder Point: <span style="font-weight:normal">{{ $supply->reorderpoint }}</span> </th>
-        </tr>
-  			<tr>
-  				<th class="col-sm-1">Date</th>
-  				<th class="col-sm-1">Reference</th>
-  				<th class="col-sm-1">Receipt Qty</th>
-  				<th class="col-sm-1">Issue Qty</th>
-  				<th class="col-sm-1">Office</th>
-  				<th class="col-sm-1">Balance Qty</th>
-  				<th class="col-sm-1">Days To Consume</th>
-  			</tr>
-  		</thead>
+      </thead>
       <tbody>
       @if(count($supply->stockcards) > 0)
         @foreach($supply->stockcards as $stockcard)
         <tr>
           <td>{{ Carbon\Carbon::parse($stockcard->date)->toFormattedDateString() }}</td>
-          <td>{{ $stockcard->reference }}</td>
+          <td>{{ $stockcard->receipt }}</td>
+          <td>{{ $stockcard->organization }}</td>
           <td>{{ $stockcard->received }}</td>
           <td>{{ $stockcard->issued }}</td>
-          <td>{{ $stockcard->organization }}</td>
+          <td>{{ $stockcard->unitcost }}</td>
+          <td>{{ $stockcard->balance * $stockcard->unitcost }}</td>
           <td>{{ $stockcard->balance }}</td>
-          <td class="col-sm-1">{{ $stockcard->daystoconsume }}</td>
+          <td>{{ $stockcard->remarks }}</td>
         </tr>
         @endforeach
       @else

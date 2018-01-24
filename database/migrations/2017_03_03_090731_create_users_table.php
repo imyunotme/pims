@@ -23,6 +23,7 @@ class CreateUsersTable extends Migration {
 			$table->string('email',100)->nullable();
 			$table->string('contact')->nullable();
 			$table->integer('access');
+			$table->string('department')->nullable();
 			$table->string('position')->nullable();
 			$table->boolean('status');
 			$table->timestamps();
@@ -37,7 +38,7 @@ class CreateUsersTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('users');
+		Schema::dropIfExists('users');
 	}
 
 }
