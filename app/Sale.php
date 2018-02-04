@@ -16,9 +16,7 @@ class Sale extends Model{
 	public function inboundRules(){
 
 		return array(
-			'category' => 'nullable|exists:categories,name',
-			'unit' => 'nullable|exists:units,name',
-			'supply' => 'nullable|exists:supplies,name',
+			'product' => 'required|exists:products,code',
 			'receipt' => 'nullable',
 			'reference' => 'nullable',
 			'remarks' => 'max:150'
@@ -28,9 +26,7 @@ class Sale extends Model{
 	public function outboundRules(){
 
 		return array(
-			'category' => 'nullable|exists:categories,name',
-			'unit' => 'nullable|exists:units,name',
-			'supply' => 'nullable|exists:supplies,name',
+			'product' => 'required|exists:products,code',
 			'receipt' => 'nullable',
 			'reference' => 'nullable',
 			'remarks' => 'max:150'
@@ -41,12 +37,36 @@ class Sale extends Model{
 		'received_total', 'issued_total', 'product_details', 'parsed_date'
 	];
 
-	public function getRemarkAttribute($value)
+	public function getRemarksAttribute($value)
 	{
-		if($this->remarks == null || $this->remarks == '')
-			return 'N\A';
+		if($value == null || $value == '')
+			return 'N/A';
 		else
-			return $this->remarks;
+			return $value;
+	}
+
+    public function getIssuedAttribute($value)
+    {
+        return number_format($value);
+    }
+
+    public function getReceivedAttribute($value)
+    {
+        return number_format($value);
+    }
+
+	public function getReceiptAttribute($value)
+	{
+		if($value == null) return 'N/A';
+
+		return $value;
+	}
+
+	public function getReferenceAttribute($value)
+	{
+		if($value == null) return 'N/A';
+
+		return $value;
 	}
 
 	public function getParsedDateAttribute()
@@ -67,10 +87,7 @@ class Sale extends Model{
 	public function getProductDetailsAttribute()
 	{
 
-		$category = count($this->product->category) > 0 ? $this->product->category->name . " - " : "";
-		$supply = count($this->product->supply) > 0 ? $this->product->supply->name . " - " : "";
-		$unit = count($this->product->unit) > 0 ? $this->product->unit->name . " - " : "";
-		return  $category . $supply . $unit ;
+		return  $this->product->product_details ;
 	}
 
 	public function computeBalanceAttribute()

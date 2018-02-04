@@ -78,14 +78,8 @@
 			columns: [
 					{ data: "parsed_date" },
 					{ data: "product_details" },
-					{ data: function(callback){
-						if(callback.receipt) return callback.receipt
-							return null
-					}},					
-					{ data: function(callback){
-						if(callback.organization) return callback.organization
-							return null
-					}},
+					{ data: "receipt"},					
+					{ data: "reference"},
 					{ data: "issued"},
 					{ data: "issued_amount"},
 					{ data: "issued_total"},

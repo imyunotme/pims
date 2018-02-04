@@ -28,25 +28,51 @@
           <!-- ================================================ -->
           <!-- ==== Recommended place for admin menu items ==== -->
           <!-- ================================================ -->
-          <li><a href="{{ url(config('backpack.base.route_prefix', 'admin').'/dashboard') }}"><i class="fa fa-dashboard"></i> <span>{{ trans('backpack::base.dashboard') }}</span></a></li>
 
           @if( Auth::user()->access == 0 || Auth::user()->access == 1 || Auth::user()->access == 2 )
 
           @if(Auth::user()->access == 0)
+          <li><a href="{{ url(config('backpack.base.route_prefix', 'admin').'/dashboard') }}"><i class="fa fa-dashboard"></i> <span>{{ trans('backpack::base.dashboard') }}</span></a></li>
 
           <li><a href="{{ url(config('backpack.base.route_prefix', 'admin').'/backup') }}"><i class="fa fa-hdd-o"></i> <span>Backups</span></a></li>
 
           @else
 
-          <li><a href="{{ url('receipt') }}"><i class="fa fa-files-o" aria-hidden="true"></i> <span> Receipt </span></a></li>
+          <li><a href="{{ url('receipt') }}"><i class="fa fa-files-o" aria-hidden="true"></i> <span> Receipts </span></a></li>
 
-          <li><a href="{{ url('sale') }}"><i class="fa fa-shopping-cart" aria-hidden="true"></i> <span> Sales </span></a></li>
+          <li class="treeview">
+            <a href="#">
+                  <i class="fa fa-shopping-cart" aria-hidden="true"></i> 
+                  <span>Sales</span>
+              <i class="fa fa-angle-left pull-right"></i>
+            </a>
+              <ul class="treeview-menu">
+                <li>
+                  <a href="{{ url('sale') }}">
+                    <li><i class="fa fa-eye" aria-hidden="true"></i>
+                    Transaction List
+                  </a>
+                </li>
+                <li>
+                  <a href="{{ url('sale/in') }}">
+                    <li><i class="fa fa-money" aria-hidden="true"></i>
+                    Cash In
+                  </a>
+                </li>
+                <li>
+                  <a href="{{ url('sale/out') }}">
+                    <li><i class="fa fa-share" aria-hidden="true"></i>
+                    Cash Out  
+                  </a>
+                </li>
+              </ul>
+          </li>
 
           <li><a href="{{ url('inventory/supply') }}"><i class="fa fa-list-alt" aria-hidden="true"></i> <span> Inventory </span></a></li>
 
           @endif
 
-          @if(Auth::user()->access == 1)
+          @if(Auth::user()->access == 0)
 
           <li class="header">Information System</li>
 

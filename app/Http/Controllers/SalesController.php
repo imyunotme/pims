@@ -25,15 +25,13 @@ class SalesController extends Controller
 
     public function in(Request $request)
     {
-        $category = App\Category::pluck('name', 'id');
-        $supply = [ '' => 'None' ] + App\Supply::pluck('name', 'id')->toArray();
-        $unit = [ '' => 'None' ] + App\Unit::pluck('name', 'id')->toArray();
         $customer = [ '' => 'None' ] + App\Reference::customer()->pluck('company', 'company')->toArray();
+        $products = [ '' => 'None' ] + App\Product::get(['id', 'code', 'category_id', 'supply_id', 'unit_id'])
+                    ->pluck('product_details', 'code')
+                    ->toArray();
 
         return view('sale.in')
-                ->with('category', $category)
-                ->with('supply', $supply)
-                ->with('unit', $unit)
+                ->with('products', $products)
                 ->with('customer', $customer);  
     }
 
@@ -43,9 +41,7 @@ class SalesController extends Controller
         $rows = $request->get('row');
         $customer = $this->sanitizeString($request->get('customer'));
         $date = $this->sanitizeString($request->get('date'));
-        $category = $request->get('category');
-        $supply = $request->get('supply');
-        $unit = $request->get('unit');
+        $product = $request->get('product');
         $quantity =$request->get('quantity');
         $amount = $request->get('amount');
         $reference = null;
@@ -63,19 +59,13 @@ class SalesController extends Controller
 
             $sale = new App\Sale;
 
-            $_category = ($category[ $row ] == '' || $category[ $row ] == 'None') ? null : $category[ $row ];
-            $_unit = ($unit[ $row ] == '' || $unit[ $row ] == 'None') ? null : $unit[ $row ];
-            $_supply = ($supply[ $row ] == '' || $supply[ $row ] == 'None') ? null : $supply[ $row ];
-
             $validator = Validator::make([
-                'category' => $_category,
-                'unit' => $_unit,
-                'supply' => $_supply,
+                'product' => $product[$row],
                 'reference' => $reference,
                 'remarks' => $remarks
             ], $sale->inboundRules());
 
-            $product = App\Product::findByCategoryName( $_category )->findBySupplyName( $_supply )->findByUnitName( $_unit )->first();
+            $product = App\Product::findByCode( $product[$row] )->first();
 
             if(count($product) <= 0)
             {
@@ -114,9 +104,9 @@ class SalesController extends Controller
 
     public function out(Request $request)
     {
-        $category = App\Category::pluck('name', 'id');
-        $supply = [ '' => 'None' ] + App\Supply::pluck('name', 'id')->toArray();
-        $unit = [ '' => 'None' ] + App\Unit::pluck('name', 'id')->toArray();
+        $products = [ '' => 'None' ] + App\Product::get(['id', 'code', 'category_id', 'supply_id', 'unit_id'])
+                    ->pluck('product_details', 'code')
+                    ->toArray();
         $supplier = [ '' => 'None' ] + App\Reference::supplier()->pluck('company', 'company')->toArray();
         $type = 'out';
         $status = [ 'unpaid' => 'Unpaid', 'paid' => 'Paid' ];
@@ -124,9 +114,7 @@ class SalesController extends Controller
         return view('sale.out')
                 ->with('type', $type)
                 ->with('status', $status)
-                ->with('category', $category)
-                ->with('supply', $supply)
-                ->with('unit', $unit)
+                ->with('products', $products)
                 ->with('supplier', $supplier); 
     }
 
@@ -135,9 +123,7 @@ class SalesController extends Controller
         $rows = $request->get('row');
         $customer = $this->sanitizeString($request->get('customer'));
         $date = $this->sanitizeString($request->get('date'));
-        $category = $request->get('category');
-        $supply = $request->get('supply');
-        $unit = $request->get('unit');
+        $product = $request->get('product');
         $quantity =$request->get('quantity');
         $amount = $request->get('amount');
         $reference = null;
@@ -149,27 +135,21 @@ class SalesController extends Controller
 
         $remarks = $this->sanitizeString($request->get('remarks'));
 
-        // return $request->all();
-
         DB::beginTransaction();
 
         foreach($rows as $row):
 
             $sale = new App\Sale;
 
-            $_category = ($category[ $row ] == '' || $category[ $row ] == 'None') ? null : $category[ $row ];
-            $_unit = ($unit[ $row ] == '' || $unit[ $row ] == 'None') ? null : $unit[ $row ];
-            $_supply = ($supply[ $row ] == '' || $supply[ $row ] == 'None') ? null : $supply[ $row ];
+            return $product[$row];
 
             $validator = Validator::make([
-                'category' => $_category,
-                'unit' => $_unit,
-                'supply' => $_supply,
+                'product' => $product[$row],
                 'reference' => $reference,
                 'remarks' => $remarks
             ], $sale->inboundRules());
 
-            $product = App\Product::findByCategoryName( $_category )->findBySupplyName( $_supply )->findByUnitName( $_unit )->first();
+            $product = App\Product::findByCode( $product[$row] )->first();
 
             if($validator->fails())
             {

@@ -20,16 +20,6 @@ Route::middleware(['auth'])->group(function(){
 
 	Route::get('dashboard','DashboardController@index');
 
-	Route::resource('maintenance/supply','SupplyController');
-
-	Route::resource('maintenance/unit','UnitsController');
-
-	Route::resource('maintenance/reference','ReferenceController');
-
-	Route::resource('maintenance/category','CategoriesController');
-
-	Route::resource('maintenance/product', 'ProductsController');
-
 	Route::resource('purchaseorder','PurchaseOrderController');
 
 	Route::get('request/generate','RequestController@generate');
@@ -57,6 +47,7 @@ Route::middleware(['auth'])->group(function(){
 	Route::get('inventory/supply', 'SupplyInventoryController@index');
 
 	Route::middleware(['admin'])->group(function(){
+		
 		Route::get('audittrail','AuditTrailController@index');
 		Route::resource('account','AccountsController');
 		Route::post('account/password/reset','AccountsController@resetPassword');
@@ -66,6 +57,16 @@ Route::middleware(['auth'])->group(function(){
 		]);
 		Route::get('import','ImportController@index');
 		Route::post('import','ImportController@store');
+
+		Route::resource('maintenance/supply','SupplyController');
+
+		Route::resource('maintenance/unit','UnitsController');
+
+		Route::resource('maintenance/reference','ReferenceController');
+
+		Route::resource('maintenance/category','CategoriesController');
+
+		Route::resource('maintenance/product', 'ProductsController');
 	});
 
 });

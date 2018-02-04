@@ -69,33 +69,11 @@
 	</div>
 	@endif
 
-	@if(isset($category) && count($category) >= 0)
+	@if(isset($products) && count($products) >= 0)
 	<div class="form-group">
 		<div class="col-md-12">
-		  {{ Form::label('category','Category Name') }}
-		  {{ Form::select('category', $category, isset($product->category_id) ? $product->category_id : old('category'),[
-		    'class'=>'form-control'
-		  ]) }}
-		</div>
-	</div>
-	@endif
-
-	@if(isset($supply) && count($supply) >= 0)
-	<div class="form-group">
-		<div class="col-md-12">
-		  {{ Form::label('supply','Supply Name') }}
-		  {{ Form::select('supply', $supply, isset($product->supply_id) ? $product->supply_id : old('supply'),[
-		    'class'=>'form-control'
-		  ]) }}
-		</div>
-	</div>
-	@endif
-
-	@if(isset($unit) && count($unit) >= 0)
-	<div class="form-group">
-		<div class="col-md-12">
-		  {{ Form::label('unit','Unit Name') }}
-		  {{ Form::select('unit', $unit, isset($product->unit_id) ? $product->unit_id : old('unit'),[
+		  {{ Form::label('product','Product') }}
+		  {{ Form::select('product', $products, old('product'),[
 		    'class'=>'form-control'
 		  ]) }}
 		</div>
@@ -131,9 +109,7 @@
 		<thead>
 			<tr>
 				<th>ID</th>
-				<th>Category</th>
-				<th>Supply</th>
-				<th>Unit</th>
+				<th>Product</th>
 				<th>Quantity</th>
 				<th>Unit Cost</th>
 				<th></th>
@@ -146,33 +122,32 @@
 		@if(null !== old('row'))
 
 			@foreach(old('row') as $row)
-				<tr>
-					<td>
-						<input type="text" class="form-control text-center" value="{{ $row }}" name="row[{{ $row }}]" style="border:none;" />
-					</td>
-					<td>
-						<input type="text" class="category-list form-control text-center" value='{{ old("category.$row") }}' name='category[{{ $row }}]' style="border:none;" />
-					</td>
-					<td>
-						<input type="text" class="supply-list form-control text-center" value='{{ old("supply.$row")}}' name="supply[{{ $row }}]" style="border:none;" />
-					</td>
-					<td>
-						<input type="text" class="unit-list form-control text-center" value='{{ old("unit.$row") }}' name="unit[{{ $row }}]" style="border:none;" />
-					</td>
-					<td>
-						<input type="number" class="form-control text-center" value='{{ old("quantity.$row") }}' name="quantity[{{ $row }}]" style="border:none;"  />
-					</td>
-					<td>
-						<input type="text" class="form-control text-center" value='{{ old("amount.$row") }}' name="amount[{{ $row }}]" style="border:none;"  />
-					</td>
-					<td>
-						<button type="button" class="remove btn btn-md btn-danger text-center"><span class="glyphicon glyphicon-remove"></span></button>
-					</td>
-				</tr>
+			<tr>
+				<td>
+					<input type="text" class="form-control text-center" value="{{ $row }}" name="row[{{ $row }}]" style="border:none;" />
+				</td>
+				<td>
+					<input type="text" class="product-list form-control text-center" value='{{ old("product.$row") }}' name='product[{{ $row }}]' style="border:none;" />
+				</td>
+				<td>
+					<input type="number" class="form-control text-center" value='{{ old("quantity.$row") }}' name="quantity[{{ $row }}]" style="border:none;"  />
+				</td>
+				<td>
+					<input type="text" class="form-control text-center" value='{{ old("amount.$row") }}' name="amount[{{ $row }}]" style="border:none;"  />
+				</td>
+				<td>
+					<button type="button" class="remove btn btn-md btn-danger text-center"><span class="glyphicon glyphicon-remove"></span></button>
+				</td>
+			</tr>
 			@endforeach
 			
+		@endif
+
+			<tr>
+				<td colspan=5 class="text-muted text-center"> ** End of List ** </td>
+			</tr>
+
 		</tbody>
-	@endif
 	</table>
 </div>
 <div class="col-md-12">
@@ -223,15 +198,13 @@ $('document').ready(function(){
 
 	$('#add').on('click',function(){
 
-		category = $('#category').find(':selected').text()
-		supply = $('#supply').find(':selected').text()
-		unit = $('#unit').find(':selected').text()
+		product = $('#product').find(':selected').text()
 		quantity = $('#quantity').val()
 		amount = $('#amount').val()
-		addForm(category, supply, unit, quantity, amount)
+		addForm(product, quantity, amount)
 	})
 
-	function addForm(category = "", supply = "", unit = "", _quantity = "", amount = 0)
+	function addForm(product = "", _quantity = 0, amount = 0)
 	{
 
 		row = parseInt( $('#supplyTable > tbody > tr').length )
@@ -240,35 +213,18 @@ $('document').ready(function(){
 			row = 1
 		} else row++
 
-		error_cat = false
-		error_supp = false
-		error_un = false
+		error = false
 
-		$('.category-list').each(function() {
-		    if (category == $(this).val())
+		$('.product-list').each(function() {
+			product_list = $(this).val()
+		    if (product == product_list)
 		    {
-		    	error_cat = true;	
+		    	error = true;	
 		    	return;
 		    }
 		});
 
-		$('.supply-list').each(function() {
-		    if (supply == $(this).val())
-		    {
-		    	error_supp = true;	
-		    	return;
-		    }
-		});
-
-		$('.unit-list').each(function() {
-		    if (unit == $(this).val())
-		    {
-		    	error_un = true;	
-		    	return;
-		    }
-		});
-
-		if(error_cat && error_supp && error_un)
+		if(error)
 		{
 			swal("Error", "Product already exists", "error");
 			return false;
@@ -277,12 +233,10 @@ $('document').ready(function(){
 		$('#quantity').val("")
 		$('#amount').val("")
 
-		$('#supplyTable > tbody').append(`
+		$('#supplyTable > tbody').prepend(`
 			<tr>
 				<td><input type="text" class="form-control text-center" value="` + row + `" name="row[` + row + `]" style="border:none;" /></td>
-				<td><input type="text" class="category-list form-control text-center" value="` + category + `" name="category[` + row + `]" style="border:none;" /></td>
-				<td><input type="text" class="supply-list form-control text-center" value="` + supply + `" name="supply[` + row + `]" style="border:none;" /></td>
-				<td><input type="text" class="unit-list form-control text-center" value="` + unit + `" name="unit[` + row + `]" style="border:none;" /></td>
+				<td><input type="text" class="product-list form-control text-center" value="` + product + `" name="product[` + row + `]" style="border:none;" /></td>
 				<td><input type="number" class="form-control text-center" value="` + _quantity + `" name="quantity[` + row + `]" style="border:none;"  /></td>
 				<td><input type="text" class="form-control text-center" value="` + amount + `" name="amount[` + row + `]" style="border:none;"  /></td>
 				<td><button type="button" class="remove btn btn-md btn-danger text-center"><span class="glyphicon glyphicon-remove"></span></button></td>

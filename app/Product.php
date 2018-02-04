@@ -15,7 +15,7 @@ class Product extends Model
     public function rules(){
 
         return array(
-            'code' => 'unique:products,code',
+            'code' => 'required|unique:products,code',
             'supply' => 'nullable|exists:Supplies,id',
             'category' => 'required|exists:Categories,id',
             'unit' => 'nullable|exists:Units,id',
@@ -26,7 +26,7 @@ class Product extends Model
     public function updateRules(){
         $code = $this->code;
         return array(
-            'code' => 'unique:products,code,' . $code . ',code',
+            'code' => 'required|unique:products,code,' . $code . ',code',
             'supply' => 'nullable|exists:Supplies,id',
             'category' => 'required|exists:Categories,id',
             'unit' => 'nullable|exists:Units,id',
@@ -35,8 +35,18 @@ class Product extends Model
     }
 
     protected $appends = [
-        'balance'
+        'balance', 'product_details'
     ];
+
+
+    public function getProductDetailsAttribute()
+    {
+
+        $category = count($this->category) > 0 ? $this->category->name . " - " : "";
+        $supply = count($this->supply) > 0 ? $this->supply->name . " - " : "";
+        $unit = count($this->unit) > 0 ? $this->unit->name . " - " : "";
+        return  $category . $supply . $unit ;
+    }
 
     public function getBalanceAttribute()
     {
@@ -46,6 +56,11 @@ class Product extends Model
             return $stockcard->balance;
         else
             return 0;
+    }
+
+    public function scopeFindByCode($query, $value)
+    {
+        $query->where('code', '=', $value);
     }
 
     public function scopeFindByCategoryName($query, $category)
